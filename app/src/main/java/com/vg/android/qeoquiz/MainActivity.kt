@@ -35,11 +35,11 @@ class MainActivity : AppCompatActivity() {
         questionTextView = findViewById(R.id.question_text_view)
 
         trueButton.setOnClickListener { view : View ->
-            Toast.makeText(this, R.string.correct_text, Toast.LENGTH_SHORT).show()
+            checkAnswer(true)
         }
 
         falseButton.setOnClickListener { view: View ->
-            Toast.makeText(this, R.string.incorrect_text, Toast.LENGTH_SHORT).show()
+            checkAnswer(false)
         }
 
         nextButton.setOnClickListener{
@@ -53,5 +53,15 @@ class MainActivity : AppCompatActivity() {
     private fun updateQuestion() {
         var stringResId = questionBank[currentIndex].stringResId
         questionTextView.setText(stringResId)
+    }
+
+    private fun checkAnswer(userAnswer : Boolean) {
+        var toastText = if (userAnswer == questionBank[currentIndex].answer) {
+            R.string.correct_text
+        } else {
+            R.string.incorrect_text
+        }
+
+        Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show()
     }
 }

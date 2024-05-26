@@ -1,4 +1,4 @@
-package com.vg.android.geoquiz
+package com.vg.android.qeoquiz
 
 import org.junit.Test
 

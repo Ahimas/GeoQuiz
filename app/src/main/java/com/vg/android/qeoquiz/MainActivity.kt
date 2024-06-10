@@ -7,8 +7,11 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 
 private const val TAG = "MainActivity"
+private const val KEY_INDEX = "index"
 
 class MainActivity : AppCompatActivity() {
 
@@ -17,16 +20,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton : Button
     private lateinit var questionTextView : TextView
 
-    private val questionBank = listOf(
-        Question(R.string.question_africa, false),
-        Question(R.string.question_oceans, true),
-        Question(R.string.question_asia, true),
-        Question(R.string.question_mideast, false),
-        Question(R.string.question_australia, true),
-        Question(R.string.question_americas, true)
-    )
-
-    private var currentIndex = 0
+    private val quizViewModel : QuizViewModel by lazy {
+        ViewModelProviders.of(this)[QuizViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +30,8 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "Called on Create(Bundle?)")
 
         setContentView(R.layout.activity_main)
+
+        quizViewModel.currentIndex = savedInstanceState?.getInt(KEY_INDEX, 0) ?: 0
 
         trueButton = findViewById(R.id.true_button)
         falseButton = findViewById(R.id.false_button)
@@ -49,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         nextButton.setOnClickListener{
-            currentIndex = (currentIndex + 1) % questionBank.size
+            quizViewModel.moveToNext()
             updateQuestion()
         }
 
@@ -76,6 +74,12 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "Called onPause")
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Log.d(TAG, "onSaveInstanceState")
+        outState.putInt(KEY_INDEX, quizViewModel.currentIndex)
+    }
+
     override fun onRestart() {
         super.onRestart()
         Log.d(TAG, "called onRestart")
@@ -86,13 +90,15 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "Called onResume")
     }
 
+
+
     private fun updateQuestion() {
-        var stringResId = questionBank[currentIndex].stringResId
+        var stringResId = quizViewModel.currentQuestionText
         questionTextView.setText(stringResId)
     }
 
     private fun checkAnswer(userAnswer : Boolean) {
-        var toastText = if (userAnswer == questionBank[currentIndex].answer) {
+        var toastText = if (userAnswer == quizViewModel.currentQuestionAnswer) {
             R.string.correct_text
         } else {
             R.string.incorrect_text

@@ -1,14 +1,15 @@
 package com.vg.android.qeoquiz
 
-import android.content.Intent
+import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 
 private const val TAG = "MainActivity"
@@ -35,6 +36,13 @@ class MainActivity : AppCompatActivity() {
 
         quizViewModel.currentIndex = savedInstanceState?.getInt(KEY_INDEX, 0) ?: 0
 
+        val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                result : ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                quizViewModel.isCheater = result.data?.getBooleanExtra(EXTRA_ANSWER_IS_SHOWN, false) ?: false
+            }
+        }
+
         trueButton = findViewById(R.id.true_button)
         falseButton = findViewById(R.id.false_button)
         nextButton = findViewById(R.id.next_button)
@@ -58,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             val answerIsTrue = quizViewModel.currentQuestionAnswer;
             val intent = CheatActivity.newIntent(this, answerIsTrue)
 
-            startActivity(intent)
+            startForResult.launch(intent)
         }
 
         updateQuestion()
@@ -100,20 +108,19 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "Called onResume")
     }
 
-
-
     private fun updateQuestion() {
         var stringResId = quizViewModel.currentQuestionText
         questionTextView.setText(stringResId)
     }
 
     private fun checkAnswer(userAnswer : Boolean) {
-        var toastText = if (userAnswer == quizViewModel.currentQuestionAnswer) {
-            R.string.correct_text
-        } else {
-            R.string.incorrect_text
+
+        val textID = when {
+            quizViewModel.isCheater -> R.string.judgment_toast
+            quizViewModel.currentQuestionAnswer == userAnswer -> R.string.correct_text
+            else -> R.string.incorrect_text
         }
 
-        Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, textID, Toast.LENGTH_SHORT).show()
     }
 }

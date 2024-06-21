@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
+const val EXTRA_ANSWER_IS_SHOWN = "com.vg.android.qeoquiz.answer_is_shown"
 private const val EXTRA_ANSWER_IS_TRUE = "com.vg.android.qeoquiz.answer_is_true"
 
 class CheatActivity : AppCompatActivity() {
@@ -29,8 +30,15 @@ class CheatActivity : AppCompatActivity() {
                 else -> R.string.false_text
             }
             answerTextView.setText(answerText)
+            setAnswerIsShown(true)
         }
 
+    }
+
+    private fun setAnswerIsShown(answerIsShown : Boolean) {
+        val data = Intent().apply { putExtra(EXTRA_ANSWER_IS_SHOWN, answerIsShown)}
+
+        setResult(RESULT_OK, data)
     }
 
     companion object {
